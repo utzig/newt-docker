@@ -15,9 +15,20 @@ RUN echo 'deb http://ppa.launchpad.net/team-gcc-arm-embedded/ppa/ubuntu xenial m
                     gcc-multilib \
                     gcc-arm-embedded \
                     gdb \
-                    openocd && \
+                    build-essential libtool pkg-config automake texinfo \
+                    libusb-dev libusb-1.0-0-dev libhidapi-dev && \
     apt-get autoremove && \
     apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+# Build openocd from source
+RUN git clone https://github.com/ntfreak/openocd && \
+    cd openocd && \
+    git checkout v0.10.0 && \
+    ./bootstrap && \
+    ./configure --enable-stlink --enable-jlink --enable-ftdi --enable-cmsis-dap && \
+    make -j && \
+    make install && \
+    cd .. && rm -rf openocd
 
 COPY jlink_5.12.3_x86_64.deb /tmp/
 RUN dpkg -i /tmp/jlink_5.12.3_x86_64.deb; dpkg-query -l; rm /tmp/jlink_5.12.3_x86_64.deb
